@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GBT8170-2019 数值修约计算器</title>
+    <style>
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .calculator {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #444;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76,175,80,0.1);
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin: 20px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 4px solid #4CAF50;
+            background-color: #f9f9f9;
+            border-radius: 0 6px 6px 0;
+        }
+        .explanation {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f8f8;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .explanation h3 {
+            color: #333;
+            margin-top: 0;
+        }
+        .explanation ul {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+        .explanation li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        optgroup {
+            font-weight: bold;
+            color: #666;
+        }
+        option {
+            padding: 4px;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .calculator {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 20px;
+            }
+        }
+        .history {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .history h3 {
+            color: #333;
+            margin-top: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .history-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        
+        .history-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .history-item .time {
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .clear-history {
+            background-color: #ff4444;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            width: auto;
+            margin: 0;
+        }
+        
+        .clear-history:hover {
+            background-color: #ff3333;
+        }
+        
+        .no-history {
+            color: #666;
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+        }
+        
+        .copyright {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 8px 15px;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-size: 12px;
+            color: #666;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            border: 1px solid #eee;
+        }
+        
+        .copyright a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .copyright a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 600px) {
+            .copyright {
+                bottom: 10px;
+                right: 10px;
+                font-size: 11px;
+                padding: 6px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>GBT8170-2019 数值修约计算器</h1>
+        
+        <!-- 添加计算类型选择 -->
+        <div class="input-group">
+            <label for="calcType">计算类型：</label>
+            <select id="calcType" onchange="toggleUnitInputs()">
+                <option value="number">数值修约</option>
+                <option value="unit">单位修约</option>
+            </select>
+        </div>
+
+        <!-- 数值输入部分 -->
+        <div id="numberInputs">
+            <div class="input-group">
+                <label for="number">输入数值：</label>
+                <input type="number" id="number" step="any" placeholder="例如：10.555">
+            </div>
+            <div class="input-group">
+                <label for="decimals">保留小数位数：</label>
+                <input type="number" id="decimals" min="0" value="2">
+            </div>
+        </div>
+
+        <!-- 单位修约输入部分 -->
+        <div id="unitInputs" style="display: none;">
+            <div class="input-group">
+                <label for="unitNumber">数值：</label>
+                <input type="number" id="unitNumber" step="any" placeholder="例如：123.456">
+            </div>
+            <div class="input-group">
+                <label for="unit">单位：</label>
+                <select id="unit">
+                    <optgroup label="整数单位">
+                        <option value="1">个位（1）</option>
+                        <option value="10">十位（10）</option>
+                        <option value="100">百位（100）</option>
+                    </optgroup>
+                    <optgroup label="小数单位">
+                        <option value="0.1">小数点后一位（0.1）</option>
+                        <option value="0.01">小数点后二位（0.01）</option>
+                        <option value="0.001">小数点后三位（0.001）</option>
+                    </optgroup>
+                    <optgroup label="特殊单位">
+                        <option value="0.2">0.2单位</option>
+                        <option value="0.5">0.5单位</option>
+                        <option value="5">5单位</option>
+                        <option value="10">10单位</option>
+                    </optgroup>
+                </select>
+            </div>
+        </div>
+
+        <button onclick="calculate()">计算</button>
+        <div id="result" class="result"></div>
+        
+        <div class="explanation">
+            <h3>修约规则说明：</h3>
+            <p>1. 数值修约规则：</p>
+            <ul>
+                <li>小于5时，舍去</li>
+                <li>大于5时，进位</li>
+                <li>等于5时：
+                    <ul>
+                        <li>5后有非零数字时，进位</li>
+                        <li>5后均为零时：奇进偶舍（前一位为奇数则进位，偶数则舍去）</li>
+                    </ul>
+                </li>
+            </ul>
+            <p>2. 单位修约规则：</p>
+            <ul>
+                <li>修约到指定单位（如十位、百位等）</li>
+                <li>遵循相同的进位规则</li>
+                <li>常用于工程测量、统计数据等场景</li>
+            </ul>
+            <p>3. 特殊单位修约规则：</p>
+            <ul>
+                <li>0.2单位：修约到最接近的0.2的倍数（如：1.3修约为1.2，1.4修约为1.4）</li>
+                <li>0.5单位：修约到最接近的0.5的倍数（如：1.3修约为1.5，1.1修约为1.0）</li>
+                <li>5单位：修约到最接近的5的倍数（如：13修约为15，12修约为10）</li>
+                <li>10单位：修约到最接近的10的倍数（如：44修约为40，46修约为50）</li>
+            </ul>
+            <p>4. 重要提示：</p>
+            <ul>
+                <li><strong>禁止连续修约：</strong>数值只能进行一次修约，不允许对已经修约过的数值再次进行修约</li>
+                <li>原因：
+                    <ul>
+                        <li>连续修约会导致累积误差</li>
+                        <li>可能违背原始数据的准确性要求</li>
+                        <li>在计算过程中应保留更多位数，最后再一次性修约到所需位数</li>
+                    </ul>
+                </li>
+                <li>示例：
+                    <ul>
+                        <li>错误做法：先修约到0.1再修约到1（连续修约）</li>
+                        <li>正确做法：直接修约到所需的最终位数</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <div class="history">
+            <h3>
+                计算历史记录
+                <button class="clear-history" onclick="clearHistory()">清除历史</button>
+            </h3>
+            <div class="history-list" id="historyList">
+                <div class="no-history">暂无计算记录</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="copyright">
+        © 2024 GBT8170-2019 数值修约计算器 | Powered by <a href="tel:+8617769030365" target="_blank">luanyuhao</a>
+    </div>
+
+    <script>
+        function toggleUnitInputs() {
+            const calcType = document.getElementById('calcType').value;
+            document.getElementById('numberInputs').style.display = 
+                calcType === 'number' ? 'block' : 'none';
+            document.getElementById('unitInputs').style.display = 
+                calcType === 'unit' ? 'block' : 'none';
+        }
+
+        function roundGBT8170(number, decimals) {
+            if (decimals < 0) {
+                throw new Error("小数位数不能为负数");
+            }
+
+            // 将数字放大相应倍数
+            const factor = Math.pow(10, decimals);
+            let value = number * factor;
+
+            // 获取需要判断的数字
+            const temp = Math.abs(value);
+            let integerPart = Math.floor(temp);
+            const decimalPart = temp - integerPart;
+
+            // 判断是否需要进位
+            if (decimalPart > 0.5) {
+                integerPart += 1;
+            } else if (decimalPart === 0.5) {
+                if (integerPart % 2 === 1) {
+                    integerPart += 1;
+                }
+            }
+
+            // 恢复符号和小数位数
+            const result = number >= 0 ? integerPart : -integerPart;
+            return result / factor;
+        }
+
+        function roundToUnit(number, unit) {
+            // 特殊单位处理
+            if ([0.2, 0.5, 5, 10].includes(parseFloat(unit))) {
+                // 将数字除以单位
+                const quotient = number / unit;
+                // 四舍五入到最近的整数
+                const rounded = Math.round(quotient);
+                // 乘回单位值
+                return rounded * unit;
+            }
+
+            // 标准单位处理
+            const scaled = number / unit;
+            const rounded = roundGBT8170(scaled, 0);
+            return rounded * unit;
+        }
+
+        // 添加保存历史记录的函数
+        function saveToHistory(type, original, result, unit = null) {
+            const time = new Date().toLocaleString();
+            const historyItem = {
+                time,
+                type,
+                original,
+                result,
+                unit
+            };
+            
+            // 从localStorage获取现有历史记录
+            let history = JSON.parse(localStorage.getItem('calcHistory') || '[]');
+            
+            // 添加新记录到开头
+            history.unshift(historyItem);
+            
+            // 只保留最近20条记录
+            if (history.length > 20) {
+                history = history.slice(0, 20);
+            }
+            
+            // 保存到localStorage
+            localStorage.setItem('calcHistory', JSON.stringify(history));
+            
+            // 更新显示
+            updateHistoryDisplay();
+        }
+
+        // 更新历史记录显示
+        function updateHistoryDisplay() {
+            const historyList = document.getElementById('historyList');
+            const history = JSON.parse(localStorage.getItem('calcHistory') || '[]');
+            
+            if (history.length === 0) {
+                historyList.innerHTML = '<div class="no-history">暂无计算记录</div>';
+                return;
+            }
+            
+            historyList.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <div class="time">${item.time}</div>
+                    <div>计算类型: ${item.type === 'number' ? '数值修约' : '单位修约'}</div>
+                    <div>原始数值: ${item.original}</div>
+                    ${item.unit ? `<div>修约单位: ${item.unit}</div>` : ''}
+                    <div>修约结果: ${item.result}</div>
+                </div>
+            `).join('');
+        }
+
+        // 清除历史记录
+        function clearHistory() {
+            if (confirm('确定要清除所有历史记录吗？')) {
+                localStorage.removeItem('calcHistory');
+                updateHistoryDisplay();
+            }
+        }
+
+        // 修改 calculate 函数，添加历史记录保存
+        function calculate() {
+            const calcType = document.getElementById('calcType').value;
+            let result;
+            let originalValue;
+
+            try {
+                if (calcType === 'number') {
+                    const number = parseFloat(document.getElementById('number').value);
+                    const decimals = parseInt(document.getElementById('decimals').value);
+
+                    if (isNaN(number) || isNaN(decimals)) {
+                        throw new Error('请输入有效的数值');
+                    }
+
+                    originalValue = number;
+                    result = roundGBT8170(number, decimals);
+                    const resultText = result.toFixed(decimals);
+                    document.getElementById('result').innerHTML = 
+                        `原始数值: ${originalValue}<br>` +
+                        `修约后结果: ${resultText}`;
+                    
+                    // 保存到历史记录
+                    saveToHistory('number', originalValue, resultText);
+                } else {
+                    const number = parseFloat(document.getElementById('unitNumber').value);
+                    const unit = parseFloat(document.getElementById('unit').value);
+
+                    if (isNaN(number)) {
+                        throw new Error('请输入有效的数值');
+                    }
+
+                    originalValue = number;
+                    result = roundToUnit(number, unit);
+                    
+                    let decimals;
+                    if (unit === 0.2 || unit === 0.5) {
+                        decimals = 1;
+                    } else if (unit >= 1) {
+                        decimals = 0;
+                    } else {
+                        decimals = Math.max(0, -Math.floor(Math.log10(unit)));
+                    }
+
+                    const resultText = result.toFixed(decimals);
+                    document.getElementById('result').innerHTML = 
+                        `原始数值: ${originalValue}<br>` +
+                        `修约单位: ${unit}<br>` +
+                        `修约后结果: ${resultText}`;
+                    
+                    // 保存到历史记录
+                    saveToHistory('unit', originalValue, resultText, unit);
+                }
+            } catch (error) {
+                document.getElementById('result').innerHTML = error.message;
+            }
+        }
+
+        // 页面加载时显示历史记录
+        window.onload = function() {
+            updateHistoryDisplay();
+        };
+    </script>
+</body>
+</html> 
