@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GBT8170-2019 数值修约计算器</title>
+    <title>《GB/T8170-2008》 数值修约计算器</title>
     <style>
         body {
             font-family: "Microsoft YaHei", Arial, sans-serif;
@@ -209,7 +209,7 @@
 </head>
 <body>
     <div class="calculator">
-        <h1>GBT8170-2019 数值修约计算器</h1>
+        <h1>《GB/T8170-2008》 数值修约计算器</h1>
         
         <!-- 添加计算类型选择 -->
         <div class="input-group">
@@ -252,8 +252,10 @@
                         <option value="0.001">小数点后三位（0.001）</option>
                     </optgroup>
                     <optgroup label="特殊单位">
-                        <option value="0.2">0.2单位</option>
-                        <option value="0.5">0.5单位</option>
+                        <option value="0.2">个位0.2单位</option>
+                        <option value="0.5">个位0.5单位</option>
+                        <option value="2">十位0.2单位（2）</option>
+                        <option value="50">百位0.5单位（50）</option>
                         <option value="5">5单位</option>
                         <option value="10">10单位</option>
                     </optgroup>
@@ -285,8 +287,10 @@
             </ul>
             <p>3. 特殊单位修约规则：</p>
             <ul>
-                <li>0.2单位：修约到最接近的0.2的倍数（如：1.3修约为1.2，1.4修约为1.4）</li>
-                <li>0.5单位：修约到最接近的0.5的倍数（如：1.3修约为1.5，1.1修约为1.0）</li>
+                <li>个位0.2单位：修约到最接近的0.2的倍数（如：1.3修约为1.2，1.4修约为1.4）</li>
+                <li>个位0.5单位：修约到最接近的0.5的倍数（如：1.3修约为1.5，1.1修约为1.0）</li>
+                <li>十位0.2单位：修约到最接近的2的倍数（如：13修约为12，14修约为14）</li>
+                <li>百位0.5单位：修约到最接近的50的倍数（如：130修约为150，110修约为100）</li>
                 <li>5单位：修约到最接近的5的倍数（如：13修约为15，12修约为10）</li>
                 <li>10单位：修约到最接近的10的倍数（如：44修约为40，46修约为50）</li>
             </ul>
